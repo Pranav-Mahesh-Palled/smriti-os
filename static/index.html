@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMRITI-OS | Open-Source Audiovisual Archival Restoration & Context Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="header-left">
+            <span class="brand-tag">UNESCO World Day for Audiovisual Heritage</span>
+            <h1 class="brand-title">SMRITI-OS</h1>
+            <span class="brand-subtitle">Multimodal Archival Rescue & Cultural Context Engine</span>
+        </div>
+        <div class="header-right">
+            <div class="status-indicator">
+                <span class="status-dot online"></span>
+                <span class="status-text" id="engine-status-badge">Gemma 4 (Local Node)</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="backboard-status-dot"></span>
+                <span class="status-text" id="backboard-status-badge">Backboard Memory</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btn-open-settings">
+                Settings & API Keys
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="main-layout">
+        <!-- Sidebar: Archive Vault Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Archival Vault</h2>
+                <span class="badge" id="record-count-badge">3 Records</span>
+            </div>
+            <div class="search-box">
+                <input type="text" id="vault-search-input" placeholder="Search archive (e.g. Belagavi, 1956, Suggi)...">
+            </div>
+            <div class="vault-list" id="vault-records-list">
+                <!-- Injected via JavaScript -->
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="technical-note">
+                    <span class="note-label">Architecture</span>
+                    <p>Track 2: Best Open-Source AI Project. Self-hostable on standard workstations without cloud lock-in.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Primary Content Area -->
+        <section class="content-viewport">
+            
+            <!-- SECTION 1: Problem & Impact (Criterion 1) -->
+            <section class="panel panel-compact">
+                <div class="panel-header">
+                    <span class="section-label">Criterion 1</span>
+                    <h3>Problem Statement & Archival Impact</h3>
+                </div>
+                <div class="impact-grid">
+                    <div class="impact-card">
+                        <h4>Target Institutions</h4>
+                        <p>District libraries, state universities, local community radio stations, and regional folklore trusts in Karnataka and South Asia.</p>
+                    </div>
+                    <div class="impact-card">
+                        <h4>Physical Degradation</h4>
+                        <p>Decaying 1/4" magnetic reels, cassette masters, and shellac discs suffering from 50Hz Indian grid hum, oxide shedding, and mechanical flutter.</p>
+                    </div>
+                    <div class="impact-card">
+                        <h4>Dark Archive Barrier</h4>
+                        <p>Unindexed flat strings (e.g., <code>AIR_BLG_56_NOV1??</code>) prevent search, preservation cataloging, and UNESCO Dublin Core compliance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Working Demo & Live Ingest (Criterion 2 - Tie Breaker) -->
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <span class="section-label">Criterion 2 — Tie-Breaker</span>
+                        <h3>Live Ingest & Messy Input Test</h3>
+                    </div>
+                    <div class="panel-actions">
+                        <span class="meta-tag" id="active-record-id">Active: SMRITI-1956-BLG-001</span>
+                    </div>
+                </div>
+
+                <div class="ingest-grid">
+                    <!-- Upload & Ingest Form -->
+                    <div class="ingest-form-col">
+                        <form id="ingest-form">
+                            <div class="form-group">
+                                <label for="audio-file-input">Archival Media File (.mp3, .wav, .ogg, .mp4)</label>
+                                <div class="file-drop-area" id="drop-area">
+                                    <input type="file" id="audio-file-input" accept=".wav,.mp3,.ogg,.mp4,.flac,.m4a" required>
+                                    <div class="drop-label" id="drop-label">
+                                        <span class="drop-text-primary">Click to select or drop archival audio/video</span>
+                                        <span class="drop-text-secondary">Universal FFmpeg decoding handles compressed music, field tapes, and optical reels</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-actions">
+                                    <label for="raw-notes-input">Messy Ingest Notes & Corrupted Metadata</label>
+                                    <div class="quick-examples">
+                                        <button type="button" class="btn-link" onclick="fillExampleNote(1)">Radio Tape</button>
+                                        <button type="button" class="btn-link" onclick="fillExampleNote(2)">Folk Song</button>
+                                        <button type="button" class="btn-link" onclick="fillExampleNote(3)">Messy PII</button>
+                                    </div>
+                                </div>
+                                <textarea id="raw-notes-input" rows="3" placeholder="Paste unformatted tape slip, e.g.: TAPE_56_BLG // LANG:KAN // UNIFICATION_SPEECH_SHAHAPUR // COND:50HZ_HUM"></textarea>
+                            </div>
+
+                            <div class="dsp-controls-grid">
+                                <div class="dsp-control">
+                                    <div class="control-header">
+                                        <label for="slider-hum">Mains Grid Notch</label>
+                                        <span class="control-val" id="val-hum">50.0 Hz</span>
+                                    </div>
+                                    <input type="range" id="slider-hum" min="45.0" max="65.0" step="0.5" value="50.0">
+                                </div>
+                                <div class="dsp-control">
+                                    <div class="control-header">
+                                        <label for="slider-hp">High-Pass Rumble</label>
+                                        <span class="control-val" id="val-hp">80 Hz</span>
+                                    </div>
+                                    <input type="range" id="slider-hp" min="40" max="150" step="5" value="80">
+                                </div>
+                                <div class="dsp-control">
+                                    <div class="control-header">
+                                        <label for="slider-gate">STFT Spectral Gate</label>
+                                        <span class="control-val" id="val-gate">85%</span>
+                                    </div>
+                                    <input type="range" id="slider-gate" min="0.30" max="0.98" step="0.05" value="0.85">
+                                </div>
+                            </div>
+
+                            <div class="form-footer">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" id="check-pii" checked>
+                                    <span>Auto-redact PII (phones, emails, IDs) before cataloging</span>
+                                </label>
+                                <button type="submit" class="btn btn-primary" id="btn-process-ingest">
+                                    Run Restoration & Gemma 4 Cataloging
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Restoration Workbench & Audio Players -->
+                    <div class="workbench-col">
+                        <!-- Content Classifier Badge -->
+                        <div class="classifier-banner" id="classifier-banner">
+                            <div class="classifier-main">
+                                <span class="classifier-type-label">Acoustic Classification:</span>
+                                <strong id="classifier-type-text">Spoken Word / Broadcast</strong>
+                            </div>
+                            <div class="classifier-telemetry" id="classifier-telemetry-text">
+                                Duration: 8.0s | Flatness: 0.18 | Dynamic Range: 19.4 dB
+                            </div>
+                        </div>
+
+                        <!-- Before (Degraded) Player & Canvas -->
+                        <div class="audio-block">
+                            <div class="audio-block-header">
+                                <span class="signal-tag degraded">Degraded Archive Signal (Before)</span>
+                                <span class="audio-metric" id="metric-snr-before">SNR: 4.2 dB</span>
+                            </div>
+                            <div class="canvas-container">
+                                <canvas id="canvas-raw" height="64"></canvas>
+                            </div>
+                            <audio id="player-raw" controls></audio>
+                        </div>
+
+                        <!-- After (Restored) Player & Canvas -->
+                        <div class="audio-block">
+                            <div class="audio-block-header">
+                                <span class="signal-tag restored">SMRITI-OS Restored Master (After)</span>
+                                <span class="audio-metric highlight" id="metric-snr-gain">+15.4 dB Gain</span>
+                            </div>
+                            <div class="canvas-container">
+                                <canvas id="canvas-clean" height="64"></canvas>
+                            </div>
+                            <audio id="player-clean" controls></audio>
+                        </div>
+
+                        <!-- Telemetry Table -->
+                        <div class="telemetry-table-container">
+                            <table class="telemetry-table">
+                                <thead>
+                                    <tr>
+                                        <th>Input SNR</th>
+                                        <th>Output SNR</th>
+                                        <th>Mains Hum Notch</th>
+                                        <th>Noise Floor Suppression</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="tel-snr-in">4.2 dB</td>
+                                        <td id="tel-snr-out">19.6 dB</td>
+                                        <td id="tel-hum-att">-36.4 dB</td>
+                                        <td id="tel-rms-drop">78.2%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Use of Gemma 4 & Responsible AI (Criterion 3 & 4) -->
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <span class="section-label">Criterion 3 & 4</span>
+                        <h3>Google Gemma 4 Cultural Archivist & Responsible AI Audit</h3>
+                    </div>
+                    <div class="model-badge">
+                        <span>gemma-4-9b-it</span>
+                    </div>
+                </div>
+
+                <!-- Gemma 4 Architecture Rationale -->
+                <div class="architecture-callout">
+                    <div class="callout-item">
+                        <strong>1. Cultural & Multilingual Reasoning:</strong>
+                        <span>Grounds historical regional place aliases (e.g. <em>Belgaum</em> &rarr; <em>Belagavi</em>, <em>Kittur</em>) and agrarian traditions (<em>Suggi Kunitha</em>) into canonical Dublin Core records without western cataloging bias.</span>
+                    </div>
+                    <div class="callout-item">
+                        <strong>2. Sensible Size & Low Latency:</strong>
+                        <span>Gemma 4 (4B/9B) enables high-throughput sub-150ms inference on a single on-premise workstation, eliminating prohibitive cloud GPU cluster bills for underfunded archives.</span>
+                    </div>
+                    <div class="callout-item">
+                        <strong>3. Community Data Sovereignty:</strong>
+                        <span>Sensitive indigenous folklore and regional oral testimonies remain securely on local infrastructure rather than proprietary external LLM APIs.</span>
+                    </div>
+                </div>
+
+                <div class="gemma-split-grid">
+                    <!-- Left: Raw Input vs Reconstructed Metadata -->
+                    <div class="metadata-col">
+                        <div class="metadata-comparison">
+                            <div class="meta-section">
+                                <span class="meta-section-title">Raw Ingest String</span>
+                                <div class="code-box raw-box" id="display-raw-metadata">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+                            <div class="meta-section">
+                                <div class="meta-section-header">
+                                    <span class="meta-section-title">Normalized Dublin Core Record (Gemma 4)</span>
+                                    <span class="confidence-pill" id="display-confidence">Confidence: 96%</span>
+                                </div>
+                                <div class="dublin-core-card" id="display-dublin-core">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Extracted Entities -->
+                        <div class="entities-wrapper">
+                            <span class="meta-section-title">Disambiguated Historical & Cultural Entities</span>
+                            <div class="entity-tags" id="display-entity-tags">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Responsible AI, Honest Classification & Time-Coded Segments -->
+                    <div class="audit-col">
+                        <!-- Responsible AI Limitations Box -->
+                        <div class="limitations-card">
+                            <div class="limitations-header">
+                                <h4>Responsible AI: System Limitations & Verification</h4>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" id="check-human-signoff">
+                                    <span id="signoff-label">Human Archivist Sign-Off Required</span>
+                                </label>
+                            </div>
+                            <ul class="limitations-list">
+                                <li><strong>Nyquist Ceiling:</strong> The DSP filter cannot synthesize harmonic information that was physically lost or unrecorded above 8 kHz on historic 16kHz transfers.</li>
+                                <li><strong>Honest Transcription:</strong> If non-vocal music or field percussion is detected, speech generation is strictly suppressed to avoid hallucinations.</li>
+                                <li><strong>PII Protection:</strong> Personal contact information is masked prior to Dublin Core serialization.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clickable Time-Aligned Transcript -->
+                        <div class="transcript-wrapper">
+                            <span class="meta-section-title">Time-Aligned Multilingual Segments (Click to Seek Audio)</span>
+                            <div class="transcript-segments-list" id="display-transcript-segments">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+
+                        <!-- 16mm Silent Film Keyframe Inspection (if record has visual frames) -->
+                        <div class="keyframes-wrapper" id="keyframes-section">
+                            <span class="meta-section-title">OpenCV Frame Detective (16mm Nitrate Reel Keyframes)</span>
+                            <div class="keyframes-grid" id="display-keyframes-grid">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Partner Integrations & Export (Criterion 5 & 6) -->
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <span class="section-label">Criterion 5 & 6</span>
+                        <h3>Partner Tech Integrations & Standards Export</h3>
+                    </div>
+                    <div class="export-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="exportData('json')">Export JSON</button>
+                        <button class="btn btn-secondary btn-sm" onclick="exportData('csv')">Export CSV</button>
+                        <button class="btn btn-secondary btn-sm" onclick="exportData('srt')">Export .SRT</button>
+                    </div>
+                </div>
+
+                <div class="integrations-grid">
+                    <!-- Backboard Unified API Section -->
+                    <div class="integration-card">
+                        <div class="card-head">
+                            <h4>Backboard Unified API</h4>
+                            <span class="tag-status" id="backboard-card-status">Memory Node Active</span>
+                        </div>
+                        <p class="card-desc">Routes queries across open-weight models and maintains persistent conversational memory across archival restoration sessions.</p>
+                        
+                        <div class="models-table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Context</th>
+                                        <th>Latency</th>
+                                        <th>Schema F1</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="backboard-models-body">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Thinking Machines Tinker LoRA Section -->
+                    <div class="integration-card">
+                        <div class="card-head">
+                            <h4>Thinking Machines Tinker Benchmark</h4>
+                            <span class="tag-status">LoRA Regional Adapter</span>
+                        </div>
+                        <p class="card-desc">Benchmarking Base Gemma 4 vs. <code>smriti-gemma4-regional-lora</code> fine-tuned on 2,400 regional Indian heritage records.</p>
+                        
+                        <div class="tinker-metrics-list" id="tinker-bench-list">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+    </main>
+
+    <!-- Settings & API Keys Modal -->
+    <div class="modal-backdrop" id="settings-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings & Partner API Keys</h3>
+                <button type="button" class="btn-close" id="btn-close-settings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-sub">Configure partner promo keys for live judging. Keys are saved to the local runtime and <code>.env</code> file.</p>
+                
+                <div class="form-group">
+                    <label for="key-backboard">Backboard API Key (<code>BACKBOARD_API_KEY</code>)</label>
+                    <input type="password" id="key-backboard" placeholder="bb_live_...">
+                    <span class="help-text">Used for persistent archival memory threads and open-model routing.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="key-tinker">Thinking Machines Tinker API Key (<code>TINKER_API_KEY</code>)</label>
+                    <input type="password" id="key-tinker" placeholder="tm_live_...">
+                    <span class="help-text">Used to run live fine-tuned regional LoRA evaluation benchmarks.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="key-gemini">Google Gemini / Gemma 4 API Key (<code>GEMINI_API_KEY</code>)</label>
+                    <input type="password" id="key-gemini" placeholder="AIzaSy...">
+                    <span class="help-text">Direct endpoint for cloud Gemma 4 execution if local Ollama node is offline.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cancel-settings">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-save-settings">Save API Keys</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
+
