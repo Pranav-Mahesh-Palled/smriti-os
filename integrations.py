@@ -267,5 +267,3 @@ def evaluate_with_tinker(raw_metadata_str: str, use_lora: bool = True) -> dict:
         "resolved_places": resolved_places,
         "schema_valid": True
     }
-
-    }
